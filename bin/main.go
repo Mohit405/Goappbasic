@@ -20,10 +20,11 @@ type Conn struct {
 }
 
 type application struct {
-	conn      Conn
-	infoError *log.Logger
-	sqlconn   *mysql.Storage
-	rediconn  *Redis.Storage
+	conn     Conn
+	logger   *log.Logger
+	ErrorLog *log.Logger
+	sqlconn  *mysql.Storage
+	rediconn *Redis.Storage
 }
 
 func main() {
@@ -33,7 +34,7 @@ func main() {
 	flag.StringVar(&con.env, "env", "development", "Environment(development|staging|production)")
 	flag.Parse()
 
-	logger := log.New(os.Stdout, "Info/t", log.Ldate|log.Ltime)
+	logger1 := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
 	redis := config.Redis{
 		Addr: "localhost:6379",
@@ -56,10 +57,10 @@ func main() {
 	}
 
 	app := &application{
-		conn:      con,
-		infoError: logger,
-		sqlconn:   mysqlConn,
-		rediconn:  redisConn,
+		conn:     con,
+		logger:   logger1,
+		sqlconn:  mysqlConn,
+		rediconn: redisConn,
 	}
 	srv := &http.Server{
 		Addr:        fmt.Sprintf(":%d", con.port),
@@ -68,5 +69,5 @@ func main() {
 	}
 
 	err = srv.ListenAndServe()
-	logger.Println(err)
+	logger1.Fatal(err)
 }
